@@ -16,6 +16,8 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import com.google.common.annotations.VisibleForTesting;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,7 +28,8 @@ public class TextProcessingService {
     private final KafkaProducerService kafkaProducerService;
     private static final String HIPSUM_API_URL = "https://hipsum.co/api/?type=hipster-centric&paras=1";
 
-    private record ParagraphAnalysis(long processingTimeNanos, String text) {}
+    @VisibleForTesting
+    record ParagraphAnalysis(long processingTimeNanos, String text) {}
 
     public TextProcessingService(RestTemplate restTemplate, KafkaProducerService kafkaProducerService) {
         this.restTemplate = restTemplate;
@@ -66,7 +69,8 @@ public class TextProcessingService {
         return finalResult;
     }
 
-    private ParagraphAnalysis fetchAndAnalyzeParagraph() {
+    @VisibleForTesting
+    ParagraphAnalysis fetchAndAnalyzeParagraph() {
         Instant paraStartTime = Instant.now();
         String text = Objects.requireNonNull(restTemplate.getForObject(HIPSUM_API_URL, String[].class))[0];
         Instant paraEndTime = Instant.now();
@@ -79,7 +83,8 @@ public class TextProcessingService {
             .filter(word -> !word.isEmpty())
             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
             .entrySet().stream()
-            .max(Map.Entry.comparingByValue())
+            .max(Map.Entry.<String, Long>comparingByValue()
+                             .thenComparing(Map.Entry.comparingByKey()))
             .map(Map.Entry::getKey)
             .orElse("N/A");
     }

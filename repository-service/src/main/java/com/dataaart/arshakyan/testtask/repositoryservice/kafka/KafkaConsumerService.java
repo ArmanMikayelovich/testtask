@@ -24,10 +24,10 @@ public class KafkaConsumerService {
             ProcessingResult message = objectMapper.readValue(messagePayload, ProcessingResult.class);
 
             ProcessingResultEntity entity = new ProcessingResultEntity(
-                message.freq_word(),
-                message.avg_paragraph_size(),
-                message.avg_paragraph_processing_time(),
-                message.total_processing_time()
+                message.mostFrequentWord(),
+                message.avgParagraphSize(),
+                message.avgProcessingTime(),
+                message.totalProcessingTime()
             );
             repository.save(entity);
         } catch (Exception e) {

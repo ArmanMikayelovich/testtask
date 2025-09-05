@@ -21,11 +21,9 @@ public class KafkaProducerService {
         try {
             log.info("Sending message to Kafka topic '{}': {}", TOPIC_NAME, result);
             String messagePayload = objectMapper.writeValueAsString(result);
-
-            kafkaTemplate.send(TOPIC_NAME, messagePayload);
+            kafkaTemplate.send(TOPIC_NAME, result.mostFrequentWord(), messagePayload);
         } catch (Exception e) {
             log.error("Error sending message to Kafka", e);
         }
     }
-
 }
